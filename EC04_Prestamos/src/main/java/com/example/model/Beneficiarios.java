@@ -15,52 +15,52 @@ public class Beneficiarios {
     public Beneficiarios() {
     }
 
-    public Beneficiarios(int idBeneficiario, int edad, String nombreBeneficiario, String ocupacion, double ingresos) {
-        this.idBeneficiario = idBeneficiario;
-        this.edad = edad;
-        this.nombreBeneficiario = nombreBeneficiario;
-        this.ocupacion = ocupacion;
-        this.ingresos = ingresos;
-    }
-
-    @XmlElement
-    public int getIdBeneficiario() {
-        return idBeneficiario;
-    }
-
-    public void setIdBeneficiario(int idBeneficiario) {
-        this.idBeneficiario = idBeneficiario;
-    }
-    @XmlElement
-    public String getNombreBeneficiario() {
-        return nombreBeneficiario;
-    }
-
-    public void setNombreBeneficiario(String nombreBeneficiario) {
-        this.nombreBeneficiario = nombreBeneficiario;
-    }
-    @XmlElement
-    public int getEdad() {
-        return edad;
-    }
-
-    public void setEdad(int edad) {
-        this.edad = edad;
-    }
-    @XmlElement
-    public String getOcupacion() {
-        return ocupacion;
-    }
-
-    public void setOcupacion(String ocupacion) {
-        this.ocupacion = ocupacion;
-    }
-    @XmlElement
-    public double getIngresos() {
-        return ingresos;
-    }
-
-    public void setIngresos(double ingresos) {
-        this.ingresos = ingresos;
-    }
+//    public Beneficiarios(int idBeneficiario, int edad, String nombreBeneficiario, String ocupacion, double ingresos) {
+//        this.idBeneficiario = idBeneficiario;
+//        this.edad = edad;
+//        this.nombreBeneficiario = nombreBeneficiario;
+//        this.ocupacion = ocupacion;
+//        this.ingresos = ingresos;
+//    }
+//
+//    @XmlElement
+//    public int getIdBeneficiario() {
+//        return idBeneficiario;
+//    }
+//
+//    public void setIdBeneficiario(int idBeneficiario) {
+//        this.idBeneficiario = idBeneficiario;
+//    }
+//    @XmlElement
+//    public String getNombreBeneficiario() {
+//        return nombreBeneficiario;
+//    }
+//
+//    public void setNombreBeneficiario(String nombreBeneficiario) {
+//        this.nombreBeneficiario = nombreBeneficiario;
+//    }
+//    @XmlElement
+//    public int getEdad() {
+//        return edad;
+//    }
+//
+//    public void setEdad(int edad) {
+//        this.edad = edad;
+//    }
+//    @XmlElement
+//    public String getOcupacion() {
+//        return ocupacion;
+//    }
+//
+//    public void setOcupacion(String ocupacion) {
+//        this.ocupacion = ocupacion;
+//    }
+//    @XmlElement
+//    public double getIngresos() {
+//        return ingresos;
+//    }
+//
+//    public void setIngresos(double ingresos) {
+//        this.ingresos = ingresos;
+//    }
 }
