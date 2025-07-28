@@ -15,13 +15,13 @@ public class Beneficiarios {
     public Beneficiarios() {
     }
 
-//    public Beneficiarios(int idBeneficiario, int edad, String nombreBeneficiario, String ocupacion, double ingresos) {
-//        this.idBeneficiario = idBeneficiario;
-//        this.edad = edad;
-//        this.nombreBeneficiario = nombreBeneficiario;
-//        this.ocupacion = ocupacion;
-//        this.ingresos = ingresos;
-//    }
+    public Beneficiarios(int idBeneficiario, int edad, String nombreBeneficiario, String ocupacion, double ingresos) {
+       this.idBeneficiario = idBeneficiario;
+       this.edad = edad;
+       this.nombreBeneficiario = nombreBeneficiario;
+       this.ocupacion = ocupacion;
+       this.ingresos = ingresos;
+    }
 //
 //    @XmlElement
 //    public int getIdBeneficiario() {
