@@ -6,7 +6,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class TipoCredito {
     private int idTipoCredito;
-    private int idProducto;
     private String tipoCredito;
     private double montoMinimo;
     private double montoSugerido;
@@ -17,15 +16,12 @@ public class TipoCredito {
     }
 
     public TipoCredito(int idTipoCredito,
-                       int idProducto,
                        String tipoCredito,
                        double montoMinimo,
                        double montoSugerido,
                        double tasaIntAnual,
-                       int mesesSugeridos)
-    {
+                       int mesesSugeridos) {
         this.idTipoCredito = idTipoCredito;
-        this.idProducto = idProducto;
         this.tipoCredito = tipoCredito;
         this.montoMinimo = montoMinimo;
         this.montoSugerido = montoSugerido;
@@ -34,7 +30,6 @@ public class TipoCredito {
     }
 
     @XmlElement
-
     public int getIdTipoCredito() {
         return idTipoCredito;
     }
@@ -50,15 +45,6 @@ public class TipoCredito {
 
     public void setTipoCredito(String tipoCredito) {
         this.tipoCredito = tipoCredito;
-    }
-
-    @XmlElement
-    public int getIdProducto() {
-        return idProducto;
-    }
-
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
     }
 
     @XmlElement

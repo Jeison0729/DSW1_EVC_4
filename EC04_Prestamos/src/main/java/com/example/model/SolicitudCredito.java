@@ -12,21 +12,21 @@ public class SolicitudCredito {
     private double montoSolicitado;
     private int plazoMeses;
     private String fechaSolicitud;
+    private String estado; //  "APROBADO" o "RECHAZADO"
+    private String motivoRechazo;
 
     public SolicitudCredito() {
     }
 
-    public SolicitudCredito(int idSolicitud, Clientes cliente,
-                            TipoCredito tipoCredito,
-                            double montoSolicitado, int plazoMeses,
-                            String fechaSolicitud)
-    {
+    public SolicitudCredito(int idSolicitud, Clientes cliente, TipoCredito tipoCredito, double montoSolicitado, int plazoMeses, String fechaSolicitud, String estado, String motivoRechazo) {
         this.idSolicitud = idSolicitud;
         this.cliente = cliente;
         this.tipoCredito = tipoCredito;
         this.montoSolicitado = montoSolicitado;
         this.plazoMeses = plazoMeses;
         this.fechaSolicitud = fechaSolicitud;
+        this.estado = estado;
+        this.motivoRechazo = motivoRechazo;
     }
 
     @XmlElement
@@ -81,5 +81,23 @@ public class SolicitudCredito {
 
     public void setFechaSolicitud(String fechaSolicitud) {
         this.fechaSolicitud = fechaSolicitud;
+    }
+
+    @XmlElement
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    @XmlElement
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
+
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
     }
 }
