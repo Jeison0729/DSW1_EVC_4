@@ -9,7 +9,9 @@ import java.util.List;
 @WebService
 public interface SolicitudService {
 
-    Clientes buscar1Cliente(int cliente);
+    Clientes buscarCliente(int idCliente);
+
+    Clientes buscarClienteDni(int dni);
 
     List<Clientes> listarClientes();
 

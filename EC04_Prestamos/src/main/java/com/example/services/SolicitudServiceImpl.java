@@ -206,15 +206,15 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
-    public Clientes buscar1Cliente(int cliente){
-        return CL.get(cliente);
+    public Clientes buscarCliente(int idCliente){
+        return CL.get(idCliente);
     }
 
     @Override
     public List<Clientes> listarClientes(){return  new ArrayList<>(CL.values());}
 
     //  buscar cliente por número de documento
-    private Clientes buscarClienteDni(int dni) {
+    public Clientes buscarClienteDni(int dni) {
         return CL.values().stream()
                 .filter(c -> c.getDniCliente() == dni)
                 .findFirst()
@@ -223,10 +223,19 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public SolicitudCredito procesarSolicitud(SolicitudCredito solicitud) {
-        // busca el cliente por dni no por id en los posts
+        if (solicitud.getCliente() == null) {
+            solicitud.setEstado("RECHAZADO");
+            solicitud.setMotivoRechazo("Datos del cliente no proporcionados");
+            return solicitud;
+        }
+        if (solicitud.getTipoCredito() == null) {
+            solicitud.setEstado("RECHAZADO");
+            solicitud.setMotivoRechazo("Tipo de crédito no especificado");
+            return solicitud;
+        }
+
         Clientes cliente = buscarClienteDni(solicitud.getCliente().getDniCliente());
         if (cliente == null) {
-            solicitud.setFechaSolicitud(LocalDate.now().toString());
             solicitud.setEstado("RECHAZADO");
             solicitud.setMotivoRechazo("Cliente no encontrado");
             return solicitud;
@@ -239,120 +248,17 @@ public class SolicitudServiceImpl implements SolicitudService {
             return solicitud;
         }
 
-        // Regla común: Edad mínima
-        if (cliente.getEdad() < 18) {
+        // Validar usando ValidadorCredito
+        String error = ValidadorSolicitud.validar(solicitud, cliente, credito);
+        if (error != null) {
             solicitud.setEstado("RECHAZADO");
-            solicitud.setMotivoRechazo("Menor de edad");
+            solicitud.setMotivoRechazo(error);
             return solicitud;
         }
 
-        // Validaciones específicas por tipo de crédito
-        switch (credito.getIdTipoCredito()) {
-            case 1: // Crédito Hipotecario
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito hipotecario no alcanzado");
-                    return solicitud;
-                }
-                if (solicitud.getPlazoMeses() > credito.getMesesSugeridos()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Plazo excede el máximo para crédito hipotecario");
-                    return solicitud;
-                }
-                break;
-
-            case 2: // Crédito para Construcción
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito construcción no alcanzado");
-                    return solicitud;
-                }
-                if (solicitud.getPlazoMeses() > credito.getMesesSugeridos()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Plazo excede el máximo para crédito construcción");
-                    return solicitud;
-                }
-                break;
-
-            case 3: // Crédito Vehicular
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito vehicular no alcanzado");
-                    return solicitud;
-                }
-                if (solicitud.getPlazoMeses() > credito.getMesesSugeridos()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Plazo excede el máximo para crédito vehicular");
-                    return solicitud;
-                }
-                break;
-
-            case 4: // Crédito Educativo
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito educativo no alcanzado");
-                    return solicitud;
-                }
-                if (cliente.getEdad() > 40) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Edad máxima para crédito educativo excedida");
-                    return solicitud;
-                }
-                break;
-
-            case 5: // Crédito Empresarial
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito empresarial no alcanzado");
-                    return solicitud;
-                }
-                if (cliente.getIngresosMes() < 2000) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Ingresos insuficientes para crédito empresarial");
-                    return solicitud;
-                }
-                break;
-
-            case 6: // Tarjeta de Crédito
-                if (cliente.getIngresosMes() < 1500) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Ingresos insuficientes para tarjeta de crédito");
-                    return solicitud;
-                }
-                if (solicitud.getMontoSolicitado() > credito.getMontoSugerido()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto solicitado excede el límite para tarjeta de crédito");
-                    return solicitud;
-                }
-                break;
-
-            case 7: // Crédito Libre Inversión
-                if (solicitud.getMontoSolicitado() < credito.getMontoMinimo()) {
-                    solicitud.setEstado("RECHAZADO");
-                    solicitud.setMotivoRechazo("Monto mínimo para crédito libre inversión no alcanzado");
-                    return solicitud;
-                }
-                break;
-
-            default:
-                solicitud.setEstado("RECHAZADO");
-                solicitud.setMotivoRechazo("Tipo de crédito no manejado");
-                return solicitud;
-        }
-
-        // Regla general: capacidad de pago (cuota mensual máximo 40% ingreso)
-        double cuotaMensual = solicitud.getMontoSolicitado() / solicitud.getPlazoMeses();
-        if (cuotaMensual > cliente.getIngresosMes() * 0.4) {
-            solicitud.setEstado("RECHAZADO");
-            solicitud.setMotivoRechazo("Capacidad de pago insuficiente");
-            return solicitud;
-        }
-
-        // Si cumple todas las reglas
+         // si cumple entonces aprueba
         solicitud.setEstado("APROBADO");
         solicitud.setMotivoRechazo(null);
-
-        // Guardar solicitud aprobada o rechazada
         int nuevoId = S_CREDITO.size() + 1;
         solicitud.setIdSolicitud(nuevoId);
         solicitud.setFechaSolicitud(LocalDate.now().toString());
@@ -360,6 +266,7 @@ public class SolicitudServiceImpl implements SolicitudService {
 
         return solicitud;
     }
+
 
 
     @Override
