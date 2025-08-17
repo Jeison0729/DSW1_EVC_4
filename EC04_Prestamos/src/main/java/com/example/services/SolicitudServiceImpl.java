@@ -154,55 +154,59 @@ public class SolicitudServiceImpl implements SolicitudService {
 
 
 // Clientes
+// Usamos `new ArrayList<>(List.of(...))` porque `List.of(...)` crea listas inmutables.
+// Esto permite agregar o quitar elementos
+        
         CL.put(1, new Clientes(
                 1, 12345678, "Juan Pérez",
                 35, "Ingeniero", 4000,
-                List.of(ctaCorriente)));
+                new ArrayList<>(List.of(ctaCorriente))));
 
         CL.put(2, new Clientes(
                 2, 87654321, "María López",
                 29, "Abogada", 5500,
-                List.of(ctaCorriente, ctoHipotecario)));
+                new ArrayList<>(List.of(ctaCorriente, ctoHipotecario))));
 
         CL.put(3, new Clientes(
                 3, 11223344, "Carlos Gómez",
                 22, "Estudiante", 800,
-                List.of(ctaCorriente)));
+                new ArrayList<>(List.of(ctaCorriente))));
 
         CL.put(4, new Clientes(
                 4, 22334455, "Lucía Torres",
                 40, "Comerciante", 3000,
-                List.of(ctaCorriente, ctoVehicular)));
+                new ArrayList<>(List.of(ctaCorriente, ctoVehicular))));
 
         CL.put(5, new Clientes(
                 5, 33445566, "Pedro Sánchez",
                 50, "Docente", 4200,
-                List.of(ctaCorriente)));
+                new ArrayList<>(List.of(ctaCorriente))));
 
         CL.put(6, new Clientes(
                 6, 44556677, "Ana Martínez",
                 31, "Enfermera", 2800,
-                List.of(ctaCorriente, ctoLibre)));
+                new ArrayList<>(List.of(ctaCorriente, ctoLibre))));
 
         CL.put(7, new Clientes(
                 7, 55667788, "Luis Rojas",
                 27, "Programador", 3800,
-                List.of(ctaCorriente, ctoHipotecario)));
+                new ArrayList<>(List.of(ctaCorriente, ctoHipotecario))));
 
         CL.put(8, new Clientes(
                 8, 66778899, "Sofía Morales",
                 24, "Diseñadora", 2500,
-                List.of(ctaCorriente)));
+                new ArrayList<>(List.of(ctaCorriente))));
 
         CL.put(9, new Clientes(
                 9, 77889900, "Miguel Castro",
                 45, "Transportista", 3200,
-                List.of(ctaCorriente, ctoVehicular)));
+                new ArrayList<>(List.of(ctaCorriente, ctoVehicular))));
 
         CL.put(10, new Clientes(
                 10, 88990011, "Valeria Herrera",
                 37, "Chef", 3100,
-                List.of(ctaCorriente)));
+                new ArrayList<>(List.of(ctaCorriente))));
+
     }
 
     @Override
@@ -223,6 +227,8 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public SolicitudCredito procesarSolicitud(SolicitudCredito solicitud) {
+        // Validación inicial:
+        // cliente y tipo de crédito
         if (solicitud.getCliente() == null) {
             solicitud.setEstado("RECHAZADO");
             solicitud.setMotivoRechazo("Datos del cliente no proporcionados");
@@ -234,6 +240,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             return solicitud;
         }
 
+        // Buscar cliente por DNI ojo no id.
         Clientes cliente = buscarClienteDni(solicitud.getCliente().getDniCliente());
         if (cliente == null) {
             solicitud.setEstado("RECHAZADO");
@@ -241,6 +248,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             return solicitud;
         }
 
+        // Buscar tipo de crédito
         TipoCredito credito = T_CREDITO.get(solicitud.getTipoCredito().getIdTipoCredito());
         if (credito == null) {
             solicitud.setEstado("RECHAZADO");
@@ -248,7 +256,27 @@ public class SolicitudServiceImpl implements SolicitudService {
             return solicitud;
         }
 
-        // Validar usando ValidadorCredito
+        // Validación 1: evita que el cliente
+        // solicite un crédito que ya tiene del mismo tipo
+        boolean yaPoseeCredito = cliente.getProductosAfiliados().stream()
+                .anyMatch(p -> p.getTipoProducto() == TipoProducto.CREDITO &&
+                        p.getTipoCredito().getIdTipoCredito() == credito.getIdTipoCredito());
+        if (yaPoseeCredito) {
+            solicitud.setEstado("RECHAZADO");
+            solicitud.setMotivoRechazo("El cliente ya posee un crédito de este tipo");
+            return solicitud;
+        }
+
+        // Validación 2: capacidad de pago
+        // (cuota máxima 40% de ingreso mensual)
+        double cuotaMensual = solicitud.getMontoSolicitado() / solicitud.getPlazoMeses();
+        if (cuotaMensual > cliente.getIngresosMes() * 0.4) {
+            solicitud.setEstado("RECHAZADO");
+            solicitud.setMotivoRechazo("Capacidad de pago insuficiente");
+            return solicitud;
+        }
+
+        // Validación específica por tipo de crédito
         String error = ValidadorSolicitud.validar(solicitud, cliente, credito);
         if (error != null) {
             solicitud.setEstado("RECHAZADO");
@@ -256,16 +284,27 @@ public class SolicitudServiceImpl implements SolicitudService {
             return solicitud;
         }
 
-         // si cumple entonces aprueba
+        // Si pasa todas las validaciones, aprobar
         solicitud.setEstado("APROBADO");
         solicitud.setMotivoRechazo(null);
         int nuevoId = S_CREDITO.size() + 1;
         solicitud.setIdSolicitud(nuevoId);
         solicitud.setFechaSolicitud(LocalDate.now().toString());
+        solicitud.setCliente(cliente);
+        solicitud.setTipoCredito(credito);
         S_CREDITO.put(nuevoId, solicitud);
 
+        cliente.getProductosAfiliados().add(
+                new Productos(
+                        credito.getIdTipoCredito(),
+                        "Crédito " + credito.getTipoCredito(),
+                        TipoProducto.CREDITO,
+                        credito
+                )
+        );
         return solicitud;
     }
+
 
 
 
